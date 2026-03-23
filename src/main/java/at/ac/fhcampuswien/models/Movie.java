@@ -2,6 +2,7 @@ package at.ac.fhcampuswien.models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 public class Movie {
@@ -50,12 +51,29 @@ public class Movie {
     // Method generateDummyMovies() that returns LIST of 20 Movie obhects with random titles/genres/years
 
     public static List<Movie> generateDummyMovies() {
-     List<Movie> movies = new ArrayList<>();
+        List<Movie> movies = new ArrayList<>();
+        Random random = new Random();
+
+        String[] titles = {
+                "Shadow Strike", "Lost Horizon", "Iron Legacy", "Silent Echo",
+                "Crimson Night", "Golden Path", "Broken Dreams", "Final Stand",
+                "Dark Origins", "Hidden Truth", "Skyfall Edge", "Last Kingdom",
+                "Frozen Time", "Burning Skies", "Mystic River", "Wild Frontier",
+                "Neon City", "Fallen Empire", "Quantum Drift", "Eternal Flame"
+        };
+
+        String[] genres = {
+                "Action", "Drama", "Comedy", "Sci-Fi", "Horror", "Thriller"
+        };
+
         for (int i = 0; i < 20; i++) {
-            movies.add(new Movie(
-                    // outstanding
-            ));
+            String title = titles[random.nextInt(titles.length)];
+            String genre = genres[random.nextInt(genres.length)];
+            int year = 1980 + random.nextInt(45); // 1980–2024
+
+            movies.add(new Movie(title, genre, year));
         }
+
         return movies;
     }
 
