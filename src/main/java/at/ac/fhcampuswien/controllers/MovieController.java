@@ -147,10 +147,12 @@ public class MovieController implements HttpHandler {
                     return;
                 }
                 // Extract values (simple parsing)
-                String title = extractValue(requestBody, "title");
-                String genre = extractValue(requestBody, "genre");
+                String title = null;
+                String genre = null;
                 int releaseYear = 0;
                 try{
+                    title = extractValue(requestBody, "title");
+                    genre = extractValue(requestBody, "genre");
                     releaseYear = Integer.parseInt(extractValue(requestBody, "releaseYear"));
                 }
                 catch(Exception e) {
