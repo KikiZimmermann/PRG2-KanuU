@@ -76,9 +76,19 @@ public class MovieController implements HttpHandler {
                 }
 
                 // Extract values (simple parsing)
-                String title = extractValue(requestBody, "title");
-                String genre = extractValue(requestBody, "genre");
+                String title = null;
+                String genre = null;
                 int releaseYear = 0;
+                try{
+                    title = extractValue(requestBody, "title");
+                    genre = extractValue(requestBody, "genre");
+                }
+                catch(Exception e) {
+                    response = "{ \"error\": \"Method not allowed\" }";
+                    ApiUtils.sendResponse(exchange, 405, response);
+                    return;
+                }
+
                 try{
                     releaseYear = Integer.parseInt(extractValue(requestBody, "releaseYear"));
                 }
