@@ -47,7 +47,7 @@ public class MovieController implements HttpHandler {
     }
 
     private void handleGetAllRequest(String method, HttpExchange exchange) throws IOException {
-        // Handle GET and POST for /api/hello/greet
+        // Handle GET and POST for /api/movies/getAll
         switch (method) {
             case "GET" -> {
                 String response = movies.toString();
@@ -59,6 +59,7 @@ public class MovieController implements HttpHandler {
             }
         }
     }
+
     private void handleAddRequest(String method, HttpExchange exchange) throws IOException {
         // Handle GET and POST for /api/hello/greet
         switch (method) {
