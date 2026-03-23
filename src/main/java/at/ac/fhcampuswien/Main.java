@@ -8,34 +8,6 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-//structure as Model-View-Controller pattern (Movie-API-MovieController)
-//provide a simple REST API to create, read, update and delete Movies
-
-
-// Create package  /models
-// Create class    Movie
-
-
-// Movie Class:
-
-// private UUID id         // data type storing Universally Unique Identifiers
-// private String title    // title of movie
-// private String genre    // e.g. Action, Drama
-// private int releaseYear
-
-// Constructors:
-// 1. default constructor automatically generate unique UUID --> UUID.randomUUID()
-// 2. constructor: accept arguments: title, genre, releaseYear; automatically generate id
-
-// Methods:
-// Getters + Setters (all properties!)
-// Override toString-Method --> return string representation of Movie object: Movie{id=<ID>, title='<title>', genre='<genre>', releaseYear=<year>}
-// public static generateDummyMovies()  --> creates + returns a list of 20 Movie objects with random titles + genres + release years
-
-
-// MovieController  // goes in cotrollers pckgs
-
-
 public class Main {
     private final static int SERVER_PORT = 8080;
 

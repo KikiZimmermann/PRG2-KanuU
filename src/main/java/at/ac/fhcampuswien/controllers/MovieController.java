@@ -161,7 +161,7 @@ public class MovieController implements HttpHandler {
                     return;
                 }
 
-                // Check if movie already exists
+                // Check if movie exists
                 for (Movie m : movies) {
                     if (m.getTitle().equalsIgnoreCase(title) &&
                             m.getGenre().equalsIgnoreCase(genre) &&
@@ -214,6 +214,7 @@ public class MovieController implements HttpHandler {
                     if (m.getId().equals(id)) {
 
                         response = "{ \"message\": \"Movie updated successfully\" "+ requestBody +" }";
+
                         if(requestBody.contains("genre")){
                             if(genre.equals("Action") || genre.equals("Drama") ||
                             genre.equals("Comedy") || genre.equals("Sci-Fi") ||
