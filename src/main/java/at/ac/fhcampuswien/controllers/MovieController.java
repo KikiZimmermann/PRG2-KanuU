@@ -78,7 +78,15 @@ public class MovieController implements HttpHandler {
                 // Extract values (simple parsing)
                 String title = extractValue(requestBody, "title");
                 String genre = extractValue(requestBody, "genre");
-                int releaseYear = Integer.parseInt(extractValue(requestBody, "releaseYear"));
+                int releaseYear = 0;
+                try{
+                    releaseYear = Integer.parseInt(extractValue(requestBody, "releaseYear"));
+                }
+                catch(Exception e) {
+                    response = "{ \"error\": \"Invalid movie data\" }";
+                    ApiUtils.sendResponse(exchange, 400, response);
+                    return;
+                }
 
                 // Check if movie already exists
                 for (Movie m : movies) {
@@ -130,7 +138,15 @@ public class MovieController implements HttpHandler {
                 // Extract values (simple parsing)
                 String title = extractValue(requestBody, "title");
                 String genre = extractValue(requestBody, "genre");
-                int releaseYear = Integer.parseInt(extractValue(requestBody, "releaseYear"));
+                int releaseYear = 0;
+                try{
+                    releaseYear = Integer.parseInt(extractValue(requestBody, "releaseYear"));
+                }
+                catch(Exception e) {
+                    response = "{ \"error\": \"Invalid movie data\" }";
+                    ApiUtils.sendResponse(exchange, 400, response);
+                    return;
+                }
 
                 // Check if movie already exists
                 for (Movie m : movies) {
