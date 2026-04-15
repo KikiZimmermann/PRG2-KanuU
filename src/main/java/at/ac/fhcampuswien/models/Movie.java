@@ -48,7 +48,7 @@ public class Movie {
         return "Movie={id=" + id + ", title='" + title + "', genre='" + genre + "', releaseYear=" + releaseYear + "}";
     }
 
-    // Method generateDummyMovies() that returns LIST of 20 Movie obhects with random titles/genres/years
+    // Method generateDummyMovies() that returns LIST of 20 Movie objects with random titles/genres/years
 
     public static List<Movie> generateDummyMovies() {
         List<Movie> movies = new ArrayList<>();

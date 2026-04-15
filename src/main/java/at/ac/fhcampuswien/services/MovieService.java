@@ -2,6 +2,7 @@ package at.ac.fhcampuswien.services;
 
 import at.ac.fhcampuswien.ApiUtils;
 import at.ac.fhcampuswien.models.Movie;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,23 +61,20 @@ public class MovieService {
         }
     }
 
-
     public Movie extractValues(String requestBody){
         try {
-            String title = extractValue(requestBody, "title");
-            String genre = extractValue(requestBody, "genre");
-            int releaseYear = Integer.parseInt(extractValue(requestBody, "releaseYear"));
-            return new Movie(title, genre, releaseYear);
+            Movie movie = extractValue(requestBody);
+            return movie;
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid movie data");
         }
     }
 
-    public boolean MovieExists(Movie Movie){
+    public boolean MovieExists(Movie movie){
         return movies.stream().anyMatch(m ->
-                m.getTitle().equalsIgnoreCase(Movie.getTitle()) &&
-                m.getGenre().equalsIgnoreCase(Movie.getGenre()) &&
-                m.getReleaseYear() == Movie.getReleaseYear()
+                m.getTitle().equalsIgnoreCase(movie.getTitle()) &&
+                m.getGenre().equalsIgnoreCase(movie.getGenre()) &&
+                m.getReleaseYear() == movie.getReleaseYear()
         );
     }
 
@@ -93,14 +91,14 @@ public class MovieService {
         }
     }
 
-    private String extractValue(String json, String key) {
-        String value = json.split("\"" + key + "\"\\s*:\\s*")[1];
+    private Movie extractValue(String json) {
 
-        if (value.startsWith("\"")) {
-            return value.split("\"")[1];
-        } else {
-            return value.split("[,}]")[0].trim();
-        }
+        Gson gson = new Gson();
+
+        Movie movie = gson.fromJson(json, Movie.class);
+
+        return movie;
+
     }
 
     public String GETMOVIEPARAM(Map<String, String> params){
