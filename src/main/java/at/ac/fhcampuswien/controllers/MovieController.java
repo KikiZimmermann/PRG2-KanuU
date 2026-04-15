@@ -2,6 +2,7 @@ package at.ac.fhcampuswien.controllers;
 
 import at.ac.fhcampuswien.ApiUtils;
 import at.ac.fhcampuswien.models.Movie;
+import at.ac.fhcampuswien.services.MovieService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -25,6 +26,7 @@ public class MovieController implements HttpHandler {
     // PUT    /api/movies/update
     private final String BASE = "/api/movies/";
     public List<Movie> movies = Movie.generateDummyMovies();
+    private final MovieService movieService = new MovieService(movies);
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -70,55 +72,19 @@ public class MovieController implements HttpHandler {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
                 String response = "{ \"Movie added successfully\": " + requestBody + " }";
 
-                if (!requestBody.contains("title") ||
-                        !requestBody.contains("genre") ||
-                        !requestBody.contains("releaseYear")) {
-
-                    response = "{ \"error\": \"Invalid movie data\" }";
-                    ApiUtils.sendResponse(exchange, 400, response);
-                    return;
-                }
-
-                // Extract values (simple parsing)
-                String title = null;
-                String genre = null;
-                int releaseYear = 0;
                 try{
-                    title = extractValue(requestBody, "title");
-                    genre = extractValue(requestBody, "genre");
-                }
-                catch(Exception e) {
-                    response = "{ \"error\": \"Method not allowed\" }";
-                    ApiUtils.sendResponse(exchange, 405, response);
-                    return;
-                }
+                    movieService.validMovie(requestBody);
+                    Movie movie = movieService.extractValues(requestBody);
+                    movieService.ADDMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear());
 
-                try{
-                    releaseYear = Integer.parseInt(extractValue(requestBody, "releaseYear"));
+                    ApiUtils.sendResponse(exchange, 201, response);
                 }
-                catch(Exception e) {
-                    response = "{ \"error\": \"Invalid movie data\" }";
-                    ApiUtils.sendResponse(exchange, 400, response);
-                    return;
+                catch(IllegalArgumentException e){
+                    ApiUtils.sendResponse(exchange, 400, "{ \"error\": \"" + e.getMessage() + "\" }");
+
+                } catch (Exception e) {
+                    ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"Server error\" }");
                 }
-
-                // Check if movie already exists
-                for (Movie m : movies) {
-                    if (m.getTitle().equalsIgnoreCase(title) &&
-                            m.getGenre().equalsIgnoreCase(genre) &&
-                            m.getReleaseYear() == releaseYear) {
-
-                        response = "{ \"error\": \"Movie already exists\" }";
-                        ApiUtils.sendResponse(exchange, 400, response);
-                        return;
-                    }
-                }
-
-                // Create new movie
-                Movie newMovie = new Movie(title, genre, releaseYear);
-                movies.add(newMovie);
-
-                ApiUtils.sendResponse(exchange, 200, response);
             }
             default -> {
                 String response = "{ \"error\": \"Method not allowed\" }";
@@ -126,57 +92,27 @@ public class MovieController implements HttpHandler {
             }
         }
     }
-    private String extractValue(String json, String key) {
-        String value = json.split("\"" + key + "\"\\s*:\\s*")[1];
 
-        if (value.startsWith("\"")) {
-            return value.split("\"")[1];
-        } else {
-            return value.split("[,}]")[0].trim();
-        }
-    }
     private void handleDeleteRequest(String method, HttpExchange exchange) throws IOException {
         // Handle GET and POST for /api/hello/greet
         switch (method) {
             case "DELETE" -> {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                String response = "{ \"error\": \"Movie not found\" }";
+                String response = "{ \"Movie deleted successfully\": " + requestBody + " }";
 
-                if (!requestBody.contains("title") ||
-                        !requestBody.contains("genre") ||
-                        !requestBody.contains("releaseYear")) {
-
-                    ApiUtils.sendResponse(exchange, 400, response);
-                    return;
-                }
-                // Extract values (simple parsing)
-                String title = null;
-                String genre = null;
-                int releaseYear = 0;
                 try{
-                    title = extractValue(requestBody, "title");
-                    genre = extractValue(requestBody, "genre");
-                    releaseYear = Integer.parseInt(extractValue(requestBody, "releaseYear"));
-                }
-                catch(Exception e) {
-                    response = "{ \"error\": \"Invalid movie data\" }";
-                    ApiUtils.sendResponse(exchange, 400, response);
-                    return;
-                }
+                    movieService.validMovie(requestBody);
+                    Movie movie = movieService.extractValues(requestBody);
+                    movieService.DELETEMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear());
 
-                // Check if movie exists
-                for (Movie m : movies) {
-                    if (m.getTitle().equalsIgnoreCase(title) &&
-                            m.getGenre().equalsIgnoreCase(genre) &&
-                            m.getReleaseYear() == releaseYear) {
-
-                        response = "{ \"Movie deleted successfully\": " + requestBody + " }";
-                        movies.remove(m);
-                        ApiUtils.sendResponse(exchange, 200, response);
-                        return;
-                    }
+                    ApiUtils.sendResponse(exchange, 200, response);
                 }
-                ApiUtils.sendResponse(exchange, 404, response);
+                catch(IllegalArgumentException e){
+                    ApiUtils.sendResponse(exchange, 400, "{ \"error\": \"" + e.getMessage() + "\" }");
+
+                } catch (Exception e) {
+                    ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"Server error\" }");
+                }
             }
             default -> {
                 String response = "{ \"error\": \"Method not allowed\" }";
@@ -189,75 +125,21 @@ public class MovieController implements HttpHandler {
         switch (method) {
             case "PUT" -> {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                String response = "{ \"The movie to be updated was not found\": }";
+                String response = "{ \"message\": \"Movie updated successfully\" "+ requestBody +" }";
 
-                if (!requestBody.contains("id")) {
-                    response = "{ \"error\": \"Invalid movie data\" }";
-                    ApiUtils.sendResponse(exchange, 400, response);
-                    return;
-                }
-
-                // Extract values (simple parsing)
-                UUID id = UUID.fromString(extractValue(requestBody, "id"));
-                String title = extractValue(requestBody, "title");
-                String genre = extractValue(requestBody, "genre");
-                int releaseYear = 0;
                 try{
-                    releaseYear = Integer.parseInt(extractValue(requestBody, "releaseYear"));
+                    movieService.validMovieID(requestBody);
+                    Movie movie = movieService.extractValues(requestBody);
+                    movieService.UPDATEMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear(), movie.getId());
+
+                    ApiUtils.sendResponse(exchange, 200, response);
                 }
-                catch(Exception e) {
-                    response = "{ \"error\": \"Invalid movie data\" }";
-                    ApiUtils.sendResponse(exchange, 400, response);
-                    return;
+                catch(IllegalArgumentException e){
+                    ApiUtils.sendResponse(exchange, 400, "{ \"error\": \"" + e.getMessage() + "\" }");
+
+                } catch (Exception e) {
+                    ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"Server error\" }");
                 }
-
-
-                // Check if movie was found
-                for (Movie m : movies) {
-                    if (m.getId().equals(id)) {
-
-                        response = "{ \"message\": \"Movie updated successfully\" "+ requestBody +" }";
-
-                        if(requestBody.contains("genre")){
-                            if(genre.equals("Action") || genre.equals("Drama") ||
-                            genre.equals("Comedy") || genre.equals("Sci-Fi") ||
-                            genre.equals("Horror") || genre.equals("Thriller")){
-                                m.setGenre(genre);
-                            }
-                            else{
-                                response = "{ \"error\": \"Invalid movie data\" }";
-                                ApiUtils.sendResponse(exchange, 400, response);
-                                return;
-                            }
-                        }
-                        if(requestBody.contains("title")) {
-                            if(title instanceof String){
-                                m.setTitle(title);
-                            }
-                            else{
-                                response = "{ \"error\": \"Invalid movie data\" }";
-                                ApiUtils.sendResponse(exchange, 400, response);
-                                return;
-                            }
-                        }
-                        if(requestBody.contains("releaseYear")){
-                            if(releaseYear > 1980){
-                                m.setReleaseYear(releaseYear);
-                            }
-                            else{
-                                response = "{ \"error\": \"Invalid movie data\" }";
-                                ApiUtils.sendResponse(exchange, 400, response);
-                                return;
-                            }
-
-                        }
-
-                        ApiUtils.sendResponse(exchange, 200, response);
-                        return;
-                    }
-                }
-
-                ApiUtils.sendResponse(exchange, 404, response);
             }
             default -> {
                 String response = "{ \"error\": \"Method not allowed\" }";
@@ -273,36 +155,16 @@ public class MovieController implements HttpHandler {
                 String query = exchange.getRequestURI().getQuery();
                 Map<String, String> params = ApiUtils.parseQueryParams(query);
 
-                String title = params.get("title");
-                String genre = params.get("genre");
-                String releaseYear = params.get("releaseYear");
-
-                List<Movie> result = new ArrayList<>();
-
-                for (Movie m : movies) {
-
-                    boolean matches = true;
-
-                    if (title != null && !m.getTitle().toLowerCase().contains(title.toLowerCase())) {
-                        matches = false;
-                    }
-
-                    if (genre != null && !m.getGenre().toLowerCase().contains(genre.toLowerCase())) {
-                        matches = false;
-                    }
-
-                    if (releaseYear != null &&
-                            !String.valueOf(m.getReleaseYear()).contains(releaseYear)) {
-                        matches = false;
-                    }
-
-                    if (matches) {
-                        result.add(m);
-                    }
+                try{
+                    String response = movieService.GETMOVIEPARAM(params);
+                    ApiUtils.sendResponse(exchange, 200, response);
                 }
+                catch(IllegalArgumentException e){
+                    ApiUtils.sendResponse(exchange, 400, "{ \"error\": \"" + e.getMessage() + "\" }");
 
-                String response = result.toString();
-                ApiUtils.sendResponse(exchange, 200, response);
+                } catch (Exception e) {
+                    ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"Server error\" }");
+                }
             }
 
             default -> {
