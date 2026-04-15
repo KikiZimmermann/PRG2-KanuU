@@ -7,7 +7,9 @@ import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class MovieController implements HttpHandler {
@@ -38,6 +40,7 @@ public class MovieController implements HttpHandler {
             case BASE + "add" -> handleAddRequest(method, exchange);
             case BASE + "delete" -> handleDeleteRequest(method, exchange);
             case BASE + "update" -> handleUpdateRequest(method, exchange);
+            case BASE + "search" -> handleSearchRequest(method, exchange);
             default -> {
                 // Path not found
                 String response = "{ \"error\": \"Path not found\" }";
@@ -256,6 +259,52 @@ public class MovieController implements HttpHandler {
 
                 ApiUtils.sendResponse(exchange, 404, response);
             }
+            default -> {
+                String response = "{ \"error\": \"Method not allowed\" }";
+                ApiUtils.sendResponse(exchange, 405, response);
+            }
+        }
+    }
+
+    private void handleSearchRequest(String method, HttpExchange exchange) throws IOException {
+        switch (method) {
+            case "GET" -> {
+
+                String query = exchange.getRequestURI().getQuery();
+                Map<String, String> params = ApiUtils.parseQueryParams(query);
+
+                String title = params.get("title");
+                String genre = params.get("genre");
+                String releaseYear = params.get("releaseYear");
+
+                List<Movie> result = new ArrayList<>();
+
+                for (Movie m : movies) {
+
+                    boolean matches = true;
+
+                    if (title != null && !m.getTitle().toLowerCase().contains(title.toLowerCase())) {
+                        matches = false;
+                    }
+
+                    if (genre != null && !m.getGenre().toLowerCase().contains(genre.toLowerCase())) {
+                        matches = false;
+                    }
+
+                    if (releaseYear != null &&
+                            !String.valueOf(m.getReleaseYear()).contains(releaseYear)) {
+                        matches = false;
+                    }
+
+                    if (matches) {
+                        result.add(m);
+                    }
+                }
+
+                String response = result.toString();
+                ApiUtils.sendResponse(exchange, 200, response);
+            }
+
             default -> {
                 String response = "{ \"error\": \"Method not allowed\" }";
                 ApiUtils.sendResponse(exchange, 405, response);
