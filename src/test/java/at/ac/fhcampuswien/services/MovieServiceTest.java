@@ -31,6 +31,75 @@ public class MovieServiceTest {
         movieService = new MovieService(movies);
     }
 
+    @Test
+    void givenNewMovie_whenValidMovie_thenMovieAddedToList() {
+
+        // Given
+        String newTitle = "Lord of the Rings";
+        String genre = "Fantasy";
+        int releaseYear = 2001;
+
+        // When
+        movieService.ADDMovie(newTitle, genre, releaseYear);
+
+        // Then
+        assertEquals(3, movies.size());
+    }
+
+    @Test
+    void givenNewMovie_whenAlreadyExists_thenThrowException() {
+
+        // Given
+        String newTitle = "Inception";
+        String genre = "Sci-Fi";
+        int releaseYear = 2010;
+
+        // When + Then
+        assertThrows(IllegalArgumentException.class, () ->
+                movieService.ADDMovie(newTitle, genre, releaseYear));
+    }
+
+    @Test
+    void givenWithInvalidReleaseYear_whenAddMovie_thenThrowIllegalArgumentException() {
+        // Given
+        String newTitle = "Lord of the Rings";
+        String genre = "Fantasy";
+        int releaseYear = 1978;
+
+        // When + Then
+        assertThrows(IllegalArgumentException.class, () ->
+                movieService.ADDMovie(newTitle, genre, releaseYear)
+        );
+    }
+
+    @Test
+    void givenMovie_whenExistingMovie_thenDeleteMovie() {
+
+        // Given
+        String newTitle = "Inception";
+        String genre = "Sci-Fi";
+        int releaseYear = 2010;
+
+        // When
+        movieService.DELETEMovie(newTitle, genre, releaseYear);
+
+        // Then
+        assertEquals(1, movies.size());
+    }
+
+    @Test
+    void givenMovie_whenNonExistingMovie_thenThrowException() {
+
+        // Given
+        String newTitle = "Lord of the Rings";
+        String genre = "Fantasy";
+        int releaseYear = 2001;
+
+        // When + Then
+        assertThrows(IllegalArgumentException.class, () ->
+                movieService.DELETEMovie(newTitle, genre, releaseYear));
+    }
+
 
 
     @Test
@@ -73,6 +142,21 @@ public class MovieServiceTest {
 
         // Then
         assertEquals(2011, movie1.getReleaseYear());
+    }
+
+    @Test
+    void givenExistingMovieId_whenInvalidRelease_thenThrowException() {
+        // Given
+        UUID id = movie1.getId();
+        String newTitle = "Lord of the Rings";
+        String genre = "Fantasy";
+        int newReleaseYear = 1979;
+
+        // When
+        movieService.UPDATEMovie(newTitle, genre, newReleaseYear, id);
+
+        // Then
+        assertNotEquals(newReleaseYear, movie1.getReleaseYear());
     }
 
     @Test
@@ -161,6 +245,8 @@ public class MovieServiceTest {
                 movieService.validMovie(requestBody)
         );
     }
+
+
 
     @Test
     void givenJsonWithId_whenValidMovieId_thenNoExceptionIsThrown() {

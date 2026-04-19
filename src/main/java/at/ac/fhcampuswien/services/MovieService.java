@@ -22,6 +22,9 @@ public class MovieService {
         if(MovieExists(newMovie)){
             throw new IllegalArgumentException("Movie already exists");
         }
+        if(releaseYear < 1980) {
+            throw new IllegalArgumentException("Release year can't be earlier than 1980");
+        }
         movies.add(newMovie);
     }
     public void DELETEMovie(String title, String genre, int releaseYear){
