@@ -27,7 +27,6 @@ public class MovieController implements HttpHandler {
     private final String BASE = "/api/movies/";
     public List<Movie> movies = Movie.generateDummyMovies();
     private final MovieService movieService = new MovieService(movies);
-
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         // Get the HTTP method (GET, POST, etc.)
