@@ -144,6 +144,7 @@ public class MovieServiceTest {
         assertEquals(2011, movie1.getReleaseYear());
     }
 
+
     @Test
     void givenExistingMovieId_whenInvalidRelease_thenThrowException() {
         // Given
@@ -158,6 +159,7 @@ public class MovieServiceTest {
         // Then
         assertNotEquals(newReleaseYear, movie1.getReleaseYear());
     }
+
 
     @Test
     void givenMovieWithSameValues_whenMovieExists_thenReturnTrue() {
@@ -261,6 +263,7 @@ public class MovieServiceTest {
         assertDoesNotThrow(() -> movieService.validMovieID(requestBody));
     }
 
+
     @Test
     void givenJsonWithoutId_whenValidMovieId_thenThrowIllegalArgumentException() {
         // Given
@@ -277,6 +280,7 @@ public class MovieServiceTest {
                 movieService.validMovieID(requestBody)
         );
     }
+
 
     @Test
     void givenValidMovieJson_whenExtractValues_thenReturnMovieWithCorrectTitle() {
@@ -314,6 +318,7 @@ public class MovieServiceTest {
         assertEquals("Sci-Fi", movie.getGenre());
     }
 
+
     @Test
     void givenValidMovieJson_whenExtractValues_thenReturnMovieWithCorrectReleaseYear() {
         // Given
@@ -332,6 +337,7 @@ public class MovieServiceTest {
         assertEquals(2009, movie.getReleaseYear());
     }
 
+
     @Test
     void givenTitleParameter_whenGetMovieParam_thenReturnMatchingMovie() {
         // Given
@@ -344,6 +350,7 @@ public class MovieServiceTest {
         // Then
         assertTrue(result.contains("Inception"));
     }
+
 
     @Test
     void givenPartialTitleParameter_whenGetMovieParam_thenReturnMatchingMovie() {
@@ -358,6 +365,7 @@ public class MovieServiceTest {
         assertTrue(result.contains("Inception"));
     }
 
+
     @Test
     void givenGenreParameterIgnoringCase_whenGetMovieParam_thenReturnMatchingMovie() {
         // Given
@@ -371,6 +379,7 @@ public class MovieServiceTest {
         assertTrue(result.contains("Titanic"));
     }
 
+
     @Test
     void givenReleaseYearParameter_whenGetMovieParam_thenReturnMatchingMovie() {
         // Given
@@ -383,6 +392,7 @@ public class MovieServiceTest {
         // Then
         assertTrue(result.contains("Inception"));
     }
+
 
     @Test
     void givenTitleParameter_whenGetMovieParam_thenDoNotReturnNonMatchingMovie() {
