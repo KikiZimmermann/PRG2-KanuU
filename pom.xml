@@ -29,7 +29,6 @@
             <scope>test</scope>
         </dependency>
 
-        // for SQL database
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
