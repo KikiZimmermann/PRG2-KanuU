@@ -1,10 +1,12 @@
 package at.ac.fhcampuswien.controllers;
 
 import at.ac.fhcampuswien.ApiUtils;
+import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 import at.ac.fhcampuswien.services.MovieRepository;
 import at.ac.fhcampuswien.services.MovieService;
+import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -58,8 +60,12 @@ public class MovieController implements HttpHandler {
         // Handle GET and POST for /api/movies/getAll
         switch (method) {
             case "GET" -> {
-                String response = movies.findAll().toString();
-                ApiUtils.sendResponse(exchange, 200, response);
+                try {
+                    String response = movies.findAll().toString();
+                    ApiUtils.sendResponse(exchange, 200, response);
+                }  catch (DatabaseException e) {
+                    ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"" + e.getMessage() + "\" }");
+                }
             }
             default -> {
                 String response = "{ \"error\": \"Method not allowed\" }";
@@ -81,7 +87,12 @@ public class MovieController implements HttpHandler {
                     movieService.ADDMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear());
 
                     ApiUtils.sendResponse(exchange, 201, response);
-                } catch(MovieNotFoundException e) {
+                } catch (JsonSyntaxException e) {
+                    ApiUtils.sendResponse(exchange, 400, "{ \"error\": \"" + e.getMessage() + "\" }");
+                } catch (DatabaseException e) {
+                    ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"" + e.getMessage() + "\" }");
+                }
+                catch(MovieNotFoundException e) {
                     ApiUtils.sendResponse(exchange, 404, "{ \"error\": \"" + e.getMessage() + "\" }");
                 } catch(IllegalArgumentException e){
                     ApiUtils.sendResponse(exchange, 400, "{ \"error\": \"" + e.getMessage() + "\" }");
@@ -109,6 +120,10 @@ public class MovieController implements HttpHandler {
                     movieService.DELETEMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear());
 
                     ApiUtils.sendResponse(exchange, 200, response);
+                } catch (JsonSyntaxException e) {
+                    ApiUtils.sendResponse(exchange, 400, "{ \"error\": \"" + e.getMessage() + "\" }");
+                } catch (DatabaseException e) {
+                    ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"" + e.getMessage() + "\" }");
                 } catch(MovieNotFoundException e) {
                     ApiUtils.sendResponse(exchange, 404, "{ \"error\": \"" + e.getMessage() + "\" }");
                 } catch(IllegalArgumentException e){
@@ -136,6 +151,10 @@ public class MovieController implements HttpHandler {
                     movieService.UPDATEMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear(), movie.getId());
 
                     ApiUtils.sendResponse(exchange, 200, response);
+                } catch (JsonSyntaxException e) {
+                    ApiUtils.sendResponse(exchange, 400, "{ \"error\": \"" + e.getMessage() + "\" }");
+                } catch (DatabaseException e) {
+                    ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"" + e.getMessage() + "\" }");
                 } catch(MovieNotFoundException e) {
                     ApiUtils.sendResponse(exchange, 404, "{ \"error\": \"" + e.getMessage() + "\" }");
                 } catch(IllegalArgumentException e){
@@ -161,6 +180,8 @@ public class MovieController implements HttpHandler {
                 try{
                     String response = movieService.GETMOVIEPARAM(params);
                     ApiUtils.sendResponse(exchange, 200, response);
+                } catch (DatabaseException e) {
+                    ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"" + e.getMessage() + "\" }");
                 }
                 catch(IllegalArgumentException e){
                     ApiUtils.sendResponse(exchange, 400, "{ \"error\": \"" + e.getMessage() + "\" }");

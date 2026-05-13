@@ -2,6 +2,7 @@ package at.ac.fhcampuswien;
 
 import at.ac.fhcampuswien.controllers.HelloController;
 import at.ac.fhcampuswien.controllers.MovieController;
+import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.models.Movie;
 import at.ac.fhcampuswien.services.MovieRepository;
 import at.ac.fhcampuswien.services.MovieService;
@@ -36,19 +37,26 @@ public class Main {
         Movie movie1 = new Movie("The Dark Knight", "Action", 2008);
         Movie movie2 = new Movie("Howl's Moving Castle", "Drama", 2004);
 
-        movies.add(movie1);
-        movies.add(movie2);
+        try {
+            movies.add(movie1);
+            movies.add(movie2);
 
-        System.out.println(movies.findAll());
-        System.out.println();
+            System.out.println(movies.findAll());
+            System.out.println();
 
-        Movie updateMovie2 = new Movie(movie2.getId(), movie2.getTitle(), movie2.getGenre(), 2020);
-        movies.update(updateMovie2);
-        System.out.println(movies.findAll());
-        System.out.println();
+            Movie updateMovie2 = new Movie(movie2.getId(), movie2.getTitle(), movie2.getGenre(), 2020);
+            movies.update(updateMovie2);
+            System.out.println(movies.findAll());
+            System.out.println();
 
-        movies.delete(movie1);
-        System.out.println(movies.findAll());
+            movies.delete(movie1);
+            System.out.println(movies.findAll());
+        } catch (DatabaseException e) {
+            System.out.println();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
     }
 
     private static void registerController(HttpServer server, String path, HttpHandler handler) {

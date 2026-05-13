@@ -1,9 +1,11 @@
 package at.ac.fhcampuswien.services;
 
 import at.ac.fhcampuswien.ApiUtils;
+import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,7 @@ public class MovieService {
     }
 
 
-    public void ADDMovie(String title, String genre, int releaseYear) throws MovieNotFoundException{
+    public void ADDMovie(String title, String genre, int releaseYear) throws MovieNotFoundException, DatabaseException {
         Movie newMovie = new Movie(title, genre, releaseYear);
         if(MovieExists(newMovie)){
             throw new IllegalArgumentException("Movie already exists");
@@ -30,14 +32,14 @@ public class MovieService {
         }
         movies.add(newMovie);
     }
-    public void DELETEMovie(String title, String genre, int releaseYear) throws MovieNotFoundException {
+    public void DELETEMovie(String title, String genre, int releaseYear) throws MovieNotFoundException,DatabaseException {
         Movie newMovie = new Movie(title, genre, releaseYear);
         if(!MovieExists(newMovie)){
             throw new IllegalArgumentException("Movie doesn't exist");
         }
         MovieExistsDELETE(newMovie);
     }
-    private void MovieExistsDELETE(Movie movie) throws MovieNotFoundException {
+    private void MovieExistsDELETE(Movie movie) throws MovieNotFoundException, DatabaseException {
         for (Movie m : movies.findAll()) {
             if (m.getTitle().equalsIgnoreCase(movie.getTitle()) &&
                     m.getGenre().equalsIgnoreCase(movie.getGenre()) &&
@@ -51,7 +53,7 @@ public class MovieService {
         throw new IllegalArgumentException("Movie not found");
 
     }
-    public void UPDATEMovie(String title, String genre, int releaseYear, UUID id) throws MovieNotFoundException {
+    public void UPDATEMovie(String title, String genre, int releaseYear, UUID id) throws MovieNotFoundException, DatabaseException {
         Movie updatedMovies = new Movie(id, title, genre, releaseYear);
         for (Movie m : movies.findAll()) {
             if (m.getId().equals(id)) {
@@ -62,7 +64,7 @@ public class MovieService {
         }
     }
 
-    public Movie extractValues(String requestBody){
+    public Movie extractValues(String requestBody) throws JsonSyntaxException{
         try {
             Movie movie = extractValue(requestBody);
             return movie;
@@ -71,7 +73,7 @@ public class MovieService {
         }
     }
 
-    public boolean MovieExists(Movie movie) throws MovieNotFoundException{
+    public boolean MovieExists(Movie movie) throws MovieNotFoundException, DatabaseException{
         if (movies.findAll().stream().anyMatch(m ->
                 m.getTitle().equalsIgnoreCase(movie.getTitle()) &&
                 m.getGenre().equalsIgnoreCase(movie.getGenre()) &&
@@ -96,7 +98,7 @@ public class MovieService {
         }
     }
 
-    private Movie extractValue(String json) {
+    private Movie extractValue(String json) throws JsonSyntaxException {
 
         Gson gson = new Gson();
 
@@ -106,7 +108,7 @@ public class MovieService {
 
     }
 
-    public String GETMOVIEPARAM(Map<String, String> params){
+    public String GETMOVIEPARAM(Map<String, String> params) throws DatabaseException{
         String title = params.get("title");
         String genre = params.get("genre");
         String releaseYear = params.get("releaseYear");

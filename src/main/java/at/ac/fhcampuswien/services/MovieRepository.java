@@ -1,6 +1,7 @@
 package at.ac.fhcampuswien.services;
 
 import at.ac.fhcampuswien.DatabaseUtil;
+import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 
@@ -18,7 +19,7 @@ public class MovieRepository {
 
     // Connection.prepareStatement():
 
-    public void add(Movie movie) {
+    public void add(Movie movie) throws DatabaseException {
 
         try (Connection conn = getConnection()) {
             String insertSQL = """
@@ -32,16 +33,17 @@ public class MovieRepository {
                 pstmt.setInt(4, movie.getReleaseYear());
                 pstmt.executeUpdate();
 
-            } catch (SQLException e) {
+            }catch (SQLException e) {
                 e.printStackTrace();
+                throw new DatabaseException("Failed to add movie");
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException("Failed to connect to data base");
         }
     }
 
-    public List<Movie> findAll() {
+    public List<Movie> findAll() throws DatabaseException {
         String sql = "SELECT * FROM movies;";
         List<Movie> movies = new ArrayList<>();
 
@@ -49,22 +51,27 @@ public class MovieRepository {
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
-            while (rs.next()) {
-                UUID id = UUID.fromString(rs.getString("id"));
-                String title = rs.getString("title");
-                String genre = rs.getString("genre");
-                int releaseYear = rs.getInt("releaseYear");
-                movies.add(new Movie(id, title, genre, releaseYear));
+            try {
+                while (rs.next()) {
+                    UUID id = UUID.fromString(rs.getString("id"));
+                    String title = rs.getString("title");
+                    String genre = rs.getString("genre");
+                    int releaseYear = rs.getInt("releaseYear");
+                    movies.add(new Movie(id, title, genre, releaseYear));
+                }
+            }catch (SQLException e) {
+                e.printStackTrace();
+                throw new DatabaseException("Failed to find all movies");
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException("Failed connect to Data Base");
         }
 
         return movies;
     }
 
-    public boolean delete(Movie movie) throws MovieNotFoundException {
+    public boolean delete(Movie movie) throws MovieNotFoundException, DatabaseException {
 
         int success = 0;
 
@@ -81,10 +88,11 @@ public class MovieRepository {
 
             } catch (SQLException e) {
                 e.printStackTrace();
+                throw new DatabaseException("Failed to delete movie");
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException("Failed to connect to data base");
         }
     if (success == 1) {
         return true;
@@ -93,7 +101,7 @@ public class MovieRepository {
     }
     }
 
-    public boolean update(Movie movie) throws MovieNotFoundException {
+    public boolean update(Movie movie) throws MovieNotFoundException,DatabaseException {
 
         int success = 0;
 
@@ -111,10 +119,12 @@ public class MovieRepository {
 
             } catch (SQLException e) {
                 e.printStackTrace();
+                throw new DatabaseException("Failed to update movie");
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException("Failed to connect to Database");
         }
         if (success == 1) {
             return true;
