@@ -10,9 +10,11 @@ import java.util.Map;
 import java.util.UUID;
 
 public class MovieService {
-    public List<Movie> movies;
+    // public List<Movie> movies;
 
-    public MovieService(List<Movie> movies) {
+    MovieRepository movies;
+
+    public MovieService(MovieRepository movies) {
         this.movies = movies;
     }
 
@@ -34,13 +36,13 @@ public class MovieService {
         }
         MovieExistsDELETE(newMovie);
     }
-    private void MovieExistsDELETE(Movie Movie){
-        for (Movie m : movies) {
-            if (m.getTitle().equalsIgnoreCase(Movie.getTitle()) &&
-                    m.getGenre().equalsIgnoreCase(Movie.getGenre()) &&
-                    m.getReleaseYear() == Movie.getReleaseYear()) {
+    private void MovieExistsDELETE(Movie movie){
+        for (Movie m : movies.findAll()) {
+            if (m.getTitle().equalsIgnoreCase(movie.getTitle()) &&
+                    m.getGenre().equalsIgnoreCase(movie.getGenre()) &&
+                    m.getReleaseYear() == movie.getReleaseYear()) {
 
-                movies.remove(m);
+                movies.delete(m);
                 return;
             }
         }
@@ -49,17 +51,18 @@ public class MovieService {
 
     }
     public void UPDATEMovie(String title, String genre, int releaseYear, UUID id){
-        for (Movie m : movies) {
+        for (Movie m : movies.findAll()) {
             if (m.getId().equals(id)) {
-                if (title != null) {
-                    m.setTitle(title);
+//                if (title != null) {
+//                    m.setTitle(title);
+//                }
+                if (releaseYear > 1980 && title != null && genre != null && ( genre.equals("Action") || genre.equals("Drama")|| genre.equals("Comedy")|| genre.equals("Sci-Fi")|| genre.equals("Horror")|| genre.equals("Thriller"))) {
+//                    m.setGenre(genre);
+                    movies.update(m);
                 }
-                if (genre != null && ( genre.equals("Action") || genre.equals("Drama")|| genre.equals("Comedy")|| genre.equals("Sci-Fi")|| genre.equals("Horror")|| genre.equals("Thriller"))) {
-                    m.setGenre(genre);
-                }
-                if (releaseYear > 1980) {
-                    m.setReleaseYear(releaseYear);
-                }
+//                if (releaseYear > 1980) {
+//                    m.setReleaseYear(releaseYear);
+//                }
             }
         }
     }
@@ -74,7 +77,7 @@ public class MovieService {
     }
 
     public boolean MovieExists(Movie movie){
-        return movies.stream().anyMatch(m ->
+        return movies.findAll().stream().anyMatch(m ->
                 m.getTitle().equalsIgnoreCase(movie.getTitle()) &&
                 m.getGenre().equalsIgnoreCase(movie.getGenre()) &&
                 m.getReleaseYear() == movie.getReleaseYear()
@@ -111,7 +114,7 @@ public class MovieService {
 
         List<Movie> result = new ArrayList<>();
 
-        for (Movie m : movies) {
+        for (Movie m : movies.findAll()) {
 
             boolean matches = true;
 

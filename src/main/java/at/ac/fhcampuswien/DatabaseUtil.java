@@ -23,7 +23,7 @@ public class DatabaseUtil {
                       id UUID PRIMARY KEY,
                       title VARCHAR(255) NOT NULL,
                       genre VARCHAR(100) NOT NULL,
-                      release_year INT NOT NULL
+                      releaseYear INT NOT NULL
                      )                   
                     """;
 

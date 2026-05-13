@@ -2,6 +2,7 @@ package at.ac.fhcampuswien.controllers;
 
 import at.ac.fhcampuswien.ApiUtils;
 import at.ac.fhcampuswien.models.Movie;
+import at.ac.fhcampuswien.services.MovieRepository;
 import at.ac.fhcampuswien.services.MovieService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -26,7 +27,7 @@ public class MovieController implements HttpHandler {
     // PUT    /api/movies/update
 
     private final String BASE = "/api/movies/";
-    public List<Movie> movies = Movie.generateDummyMovies();
+    public MovieRepository movies;
     private final MovieService movieService = new MovieService(movies);
 
     @Override
@@ -56,7 +57,7 @@ public class MovieController implements HttpHandler {
         // Handle GET and POST for /api/movies/getAll
         switch (method) {
             case "GET" -> {
-                String response = movies.toString();
+                String response = movies.findAll().toString();
                 ApiUtils.sendResponse(exchange, 200, response);
             }
             default -> {
