@@ -1,6 +1,7 @@
 package at.ac.fhcampuswien.controllers;
 
 import at.ac.fhcampuswien.ApiUtils;
+import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 import at.ac.fhcampuswien.services.MovieRepository;
 import at.ac.fhcampuswien.services.MovieService;
@@ -27,7 +28,7 @@ public class MovieController implements HttpHandler {
     // PUT    /api/movies/update
 
     private final String BASE = "/api/movies/";
-    public MovieRepository movies;
+    public MovieRepository movies = new MovieRepository();
     private final MovieService movieService = new MovieService(movies);
 
     @Override
@@ -80,10 +81,10 @@ public class MovieController implements HttpHandler {
                     movieService.ADDMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear());
 
                     ApiUtils.sendResponse(exchange, 201, response);
-                }
-                catch(IllegalArgumentException e){
+                } catch(MovieNotFoundException e) {
+                    ApiUtils.sendResponse(exchange, 404, "{ \"error\": \"" + e.getMessage() + "\" }");
+                } catch(IllegalArgumentException e){
                     ApiUtils.sendResponse(exchange, 400, "{ \"error\": \"" + e.getMessage() + "\" }");
-
                 } catch (Exception e) {
                     ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"Server error\" }");
                 }
@@ -108,10 +109,10 @@ public class MovieController implements HttpHandler {
                     movieService.DELETEMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear());
 
                     ApiUtils.sendResponse(exchange, 200, response);
-                }
-                catch(IllegalArgumentException e){
+                } catch(MovieNotFoundException e) {
+                    ApiUtils.sendResponse(exchange, 404, "{ \"error\": \"" + e.getMessage() + "\" }");
+                } catch(IllegalArgumentException e){
                     ApiUtils.sendResponse(exchange, 400, "{ \"error\": \"" + e.getMessage() + "\" }");
-
                 } catch (Exception e) {
                     ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"Server error\" }");
                 }
@@ -135,10 +136,10 @@ public class MovieController implements HttpHandler {
                     movieService.UPDATEMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear(), movie.getId());
 
                     ApiUtils.sendResponse(exchange, 200, response);
-                }
-                catch(IllegalArgumentException e){
+                } catch(MovieNotFoundException e) {
+                    ApiUtils.sendResponse(exchange, 404, "{ \"error\": \"" + e.getMessage() + "\" }");
+                } catch(IllegalArgumentException e){
                     ApiUtils.sendResponse(exchange, 400, "{ \"error\": \"" + e.getMessage() + "\" }");
-
                 } catch (Exception e) {
                     ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"Server error\" }");
                 }

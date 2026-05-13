@@ -1,6 +1,7 @@
 package at.ac.fhcampuswien.services;
 
 import at.ac.fhcampuswien.ApiUtils;
+import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 import com.google.gson.Gson;
 
@@ -19,7 +20,7 @@ public class MovieService {
     }
 
 
-    public void ADDMovie(String title, String genre, int releaseYear){
+    public void ADDMovie(String title, String genre, int releaseYear) throws MovieNotFoundException{
         Movie newMovie = new Movie(title, genre, releaseYear);
         if(MovieExists(newMovie)){
             throw new IllegalArgumentException("Movie already exists");
@@ -29,14 +30,14 @@ public class MovieService {
         }
         movies.add(newMovie);
     }
-    public void DELETEMovie(String title, String genre, int releaseYear){
+    public void DELETEMovie(String title, String genre, int releaseYear) throws MovieNotFoundException {
         Movie newMovie = new Movie(title, genre, releaseYear);
         if(!MovieExists(newMovie)){
             throw new IllegalArgumentException("Movie doesn't exist");
         }
         MovieExistsDELETE(newMovie);
     }
-    private void MovieExistsDELETE(Movie movie){
+    private void MovieExistsDELETE(Movie movie) throws MovieNotFoundException {
         for (Movie m : movies.findAll()) {
             if (m.getTitle().equalsIgnoreCase(movie.getTitle()) &&
                     m.getGenre().equalsIgnoreCase(movie.getGenre()) &&
@@ -50,19 +51,13 @@ public class MovieService {
         throw new IllegalArgumentException("Movie not found");
 
     }
-    public void UPDATEMovie(String title, String genre, int releaseYear, UUID id){
+    public void UPDATEMovie(String title, String genre, int releaseYear, UUID id) throws MovieNotFoundException {
+        Movie updatedMovies = new Movie(id, title, genre, releaseYear);
         for (Movie m : movies.findAll()) {
             if (m.getId().equals(id)) {
-//                if (title != null) {
-//                    m.setTitle(title);
-//                }
                 if (releaseYear > 1980 && title != null && genre != null && ( genre.equals("Action") || genre.equals("Drama")|| genre.equals("Comedy")|| genre.equals("Sci-Fi")|| genre.equals("Horror")|| genre.equals("Thriller"))) {
-//                    m.setGenre(genre);
-                    movies.update(m);
+                    movies.update(updatedMovies);
                 }
-//                if (releaseYear > 1980) {
-//                    m.setReleaseYear(releaseYear);
-//                }
             }
         }
     }
@@ -76,12 +71,16 @@ public class MovieService {
         }
     }
 
-    public boolean MovieExists(Movie movie){
-        return movies.findAll().stream().anyMatch(m ->
+    public boolean MovieExists(Movie movie) throws MovieNotFoundException{
+        if (movies.findAll().stream().anyMatch(m ->
                 m.getTitle().equalsIgnoreCase(movie.getTitle()) &&
                 m.getGenre().equalsIgnoreCase(movie.getGenre()) &&
-                m.getReleaseYear() == movie.getReleaseYear()
-        );
+                m.getReleaseYear() == movie.getReleaseYear()))
+        {
+            return true;
+        } else {
+            throw new MovieNotFoundException();
+        }
     }
 
     public void validMovie(String requestBody){

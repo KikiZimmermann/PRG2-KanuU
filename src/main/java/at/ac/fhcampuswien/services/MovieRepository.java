@@ -1,6 +1,7 @@
 package at.ac.fhcampuswien.services;
 
 import at.ac.fhcampuswien.DatabaseUtil;
+import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 
 import java.sql.Connection;
@@ -63,7 +64,7 @@ public class MovieRepository {
         return movies;
     }
 
-    public boolean delete(Movie movie) {
+    public boolean delete(Movie movie) throws MovieNotFoundException {
 
         int success = 0;
 
@@ -88,11 +89,11 @@ public class MovieRepository {
     if (success == 1) {
         return true;
     } else {
-        return false;
+        throw new MovieNotFoundException();
     }
     }
 
-    public boolean update(Movie movie) {
+    public boolean update(Movie movie) throws MovieNotFoundException {
 
         int success = 0;
 
@@ -118,7 +119,7 @@ public class MovieRepository {
         if (success == 1) {
             return true;
         } else {
-            return false;
+            throw new MovieNotFoundException();
         }
 
     }
