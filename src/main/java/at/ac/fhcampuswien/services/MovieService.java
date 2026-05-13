@@ -35,7 +35,7 @@ public class MovieService {
     public void DELETEMovie(String title, String genre, int releaseYear) throws MovieNotFoundException,DatabaseException {
         Movie newMovie = new Movie(title, genre, releaseYear);
         if(!MovieExists(newMovie)){
-            throw new IllegalArgumentException("Movie doesn't exist");
+            throw new MovieNotFoundException();
         }
         MovieExistsDELETE(newMovie);
     }
@@ -49,9 +49,7 @@ public class MovieService {
                 return;
             }
         }
-
-        throw new IllegalArgumentException("Movie not found");
-
+        throw new MovieNotFoundException();
     }
     public void UPDATEMovie(String title, String genre, int releaseYear, UUID id) throws MovieNotFoundException, DatabaseException {
         Movie updatedMovies = new Movie(id, title, genre, releaseYear);
@@ -59,6 +57,9 @@ public class MovieService {
             if (m.getId().equals(id)) {
                 if (releaseYear > 1980 && title != null && genre != null && ( genre.equals("Action") || genre.equals("Drama")|| genre.equals("Comedy")|| genre.equals("Sci-Fi")|| genre.equals("Horror")|| genre.equals("Thriller"))) {
                     movies.update(updatedMovies);
+                }
+                else{
+                    throw new IllegalArgumentException("Update data Not allowed");
                 }
             }
         }
@@ -81,7 +82,8 @@ public class MovieService {
         {
             return true;
         } else {
-            throw new MovieNotFoundException();
+            return false;
+
         }
     }
 

@@ -1,38 +1,45 @@
 package at.ac.fhcampuswien.services;
 
+import at.ac.fhcampuswien.exceptions.DatabaseException;
+import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
+import com.google.errorprone.annotations.DoNotMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class MovieServiceTest {
 
     private MovieService movieService;
-    private List<Movie> movies;
-    private Movie movie1;
-    private Movie movie2;
+    @Mock
+    private MovieRepository movieRepository;
 
     @BeforeEach
-    void setUp() {
-        movie1 = new Movie("Inception", "Sci-Fi", 2010);
-        movie2 = new Movie("Titanic", "Drama", 1997);
+    void setUp() throws DatabaseException, MovieNotFoundException {
+        //Mock the MovieRepository
+        movieRepository = mock(MovieRepository.class);
 
-        movies = new ArrayList<>();
-        movies.add(movie1);
-        movies.add(movie2);
+        UUID id = UUID.fromString("b2bcf03a-36e6-41ce-8da7-7a313a0441cb");
+        //Sample movies
+        List<Movie> movies = new ArrayList<>(Arrays.asList(
+            new Movie(id,"Inception", "Sci-Fi", 2010),
+                new Movie("HalloWelt", "Sci-Fi", 2000),
+            new Movie("Titanic", "Drama", 1997)
+        ));
 
-        movieService = new MovieService(movies);
+        //Mock the repository methods
+        when(movieRepository.findAll()).thenReturn(movies);
+
+        movieService = new MovieService(movieRepository);
     }
 
     @Test
-    void givenNewMovie_whenValidMovie_thenMovieAddedToList() {
+    void givenNewMovie_whenValidMovie_thenMovieAddedToList() throws MovieNotFoundException, DatabaseException{
 
         // Given
         String newTitle = "Lord of the Rings";
@@ -43,7 +50,7 @@ public class MovieServiceTest {
         movieService.ADDMovie(newTitle, genre, releaseYear);
 
         // Then
-        assertEquals(3, movies.size());
+        verify(movieRepository, times(1)).add(any(Movie.class));
     }
 
     @Test
@@ -73,7 +80,7 @@ public class MovieServiceTest {
     }
 
     @Test
-    void givenMovie_whenExistingMovie_thenDeleteMovie() {
+    void givenMovie_whenExistingMovie_thenDeleteMovie() throws DatabaseException, MovieNotFoundException {
 
         // Given
         String newTitle = "Inception";
@@ -84,7 +91,7 @@ public class MovieServiceTest {
         movieService.DELETEMovie(newTitle, genre, releaseYear);
 
         // Then
-        assertEquals(1, movies.size());
+        verify(movieRepository).delete(any(Movie.class));
     }
 
     @Test
@@ -96,16 +103,16 @@ public class MovieServiceTest {
         int releaseYear = 2001;
 
         // When + Then
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MovieNotFoundException.class, () ->
                 movieService.DELETEMovie(newTitle, genre, releaseYear));
     }
 
 
 
     @Test
-    void givenExistingMovieId_whenUpdateTitle_thenTitleIsUpdated() {
+    void givenExistingMovieId_whenUpdateTitle_thenTitleIsUpdated() throws DatabaseException, MovieNotFoundException {
         // Given
-        UUID id = movie1.getId();
+        UUID id = UUID.fromString("b2bcf03a-36e6-41ce-8da7-7a313a0441cb");
         String newTitle = "Inception Updated";
         String genre = "Sci-Fi";
         int releaseYear = 2010;
@@ -114,55 +121,57 @@ public class MovieServiceTest {
         movieService.UPDATEMovie(newTitle, genre, releaseYear, id);
 
         // Then
-        assertEquals("Inception Updated", movie1.getTitle());
+        verify(movieRepository, times(1)).update(any(Movie.class));
     }
 
     @Test
-    void givenExistingMovieId_whenUpdateGenre_thenGenreIsUpdated() {
+    void givenExistingMovieId_whenUpdateGenre_thenGenreIsUpdated() throws DatabaseException, MovieNotFoundException {
         // Given
-        UUID id = movie1.getId();
+        UUID id = UUID.fromString("b2bcf03a-36e6-41ce-8da7-7a313a0441cb");
         String newGenre = "Action";
         int releaseYear = 2010;
+        String newTitle = "Inception Updated";
 
         // When
-        movieService.UPDATEMovie(null, newGenre, releaseYear, id);
+        movieService.UPDATEMovie(newTitle, newGenre, releaseYear, id);
 
         // Then
-        assertEquals("Action", movie1.getGenre());
+        verify(movieRepository, times(1)).update(any(Movie.class));
     }
 
     @Test
-    void givenExistingMovieId_whenUpdateRelease_thenReleaseYearIsUpdated() {
+    void givenExistingMovieId_whenUpdateRelease_thenReleaseYearIsUpdated() throws DatabaseException, MovieNotFoundException {
         // Given
-        UUID id = movie1.getId();
+        UUID id = UUID.fromString("b2bcf03a-36e6-41ce-8da7-7a313a0441cb");
+        String newTitle = "Inception Updated";
+        String genre = "Sci-Fi";
         int newReleaseYear = 2011;
-
-        // When
-        movieService.UPDATEMovie(null, null, newReleaseYear, id);
-
-        // Then
-        assertEquals(2011, movie1.getReleaseYear());
-    }
-
-
-    @Test
-    void givenExistingMovieId_whenInvalidRelease_thenThrowException() {
-        // Given
-        UUID id = movie1.getId();
-        String newTitle = "Lord of the Rings";
-        String genre = "Fantasy";
-        int newReleaseYear = 1979;
 
         // When
         movieService.UPDATEMovie(newTitle, genre, newReleaseYear, id);
 
         // Then
-        assertNotEquals(newReleaseYear, movie1.getReleaseYear());
+        verify(movieRepository, times(1)).update(any(Movie.class));
     }
 
 
     @Test
-    void givenMovieWithSameValues_whenMovieExists_thenReturnTrue() {
+    void givenExistingMovieId_whenInvalidRelease_thenThrowException() throws DatabaseException, MovieNotFoundException {
+        // Given
+        UUID id = UUID.fromString("b2bcf03a-36e6-41ce-8da7-7a313a0441cb");
+        String newTitle = "Inception";
+        String genre = "Fantasy";
+        int newReleaseYear = 1979;
+
+        // When + Then
+        assertThrows(IllegalArgumentException.class, () ->
+                movieService.UPDATEMovie(newTitle, genre, newReleaseYear, id)
+        );
+    }
+
+
+    @Test
+    void givenMovieWithSameValues_whenMovieExists_thenReturnTrue() throws DatabaseException, MovieNotFoundException {
         // Given
         Movie testMovie = new Movie("Inception", "Sci-Fi", 2010);
 
@@ -174,7 +183,7 @@ public class MovieServiceTest {
     }
 
     @Test
-    void givenMovieWithDifferentValues_whenMovieExists_thenReturnFalse() {
+    void givenMovieWithDifferentValues_whenMovieExists_thenReturnFalse() throws DatabaseException, MovieNotFoundException {
         // Given
         Movie testMovie = new Movie("Avatar", "Sci-Fi", 2009);
 
@@ -339,7 +348,7 @@ public class MovieServiceTest {
 
 
     @Test
-    void givenTitleParameter_whenGetMovieParam_thenReturnMatchingMovie() {
+    void givenTitleParameter_whenGetMovieParam_thenReturnMatchingMovie() throws DatabaseException {
         // Given
         Map<String, String> params = new HashMap<>();
         params.put("title", "Inception");
@@ -353,7 +362,7 @@ public class MovieServiceTest {
 
 
     @Test
-    void givenPartialTitleParameter_whenGetMovieParam_thenReturnMatchingMovie() {
+    void givenPartialTitleParameter_whenGetMovieParam_thenReturnMatchingMovie() throws DatabaseException {
         // Given
         Map<String, String> params = new HashMap<>();
         params.put("title", "cep");
@@ -367,7 +376,7 @@ public class MovieServiceTest {
 
 
     @Test
-    void givenGenreParameterIgnoringCase_whenGetMovieParam_thenReturnMatchingMovie() {
+    void givenGenreParameterIgnoringCase_whenGetMovieParam_thenReturnMatchingMovie() throws DatabaseException {
         // Given
         Map<String, String> params = new HashMap<>();
         params.put("genre", "drama");
@@ -381,7 +390,7 @@ public class MovieServiceTest {
 
 
     @Test
-    void givenReleaseYearParameter_whenGetMovieParam_thenReturnMatchingMovie() {
+    void givenReleaseYearParameter_whenGetMovieParam_thenReturnMatchingMovie() throws DatabaseException {
         // Given
         Map<String, String> params = new HashMap<>();
         params.put("releaseYear", "2010");
@@ -395,7 +404,7 @@ public class MovieServiceTest {
 
 
     @Test
-    void givenTitleParameter_whenGetMovieParam_thenDoNotReturnNonMatchingMovie() {
+    void givenTitleParameter_whenGetMovieParam_thenDoNotReturnNonMatchingMovie() throws DatabaseException {
         // Given
         Map<String, String> params = new HashMap<>();
         params.put("title", "Inception");
@@ -405,5 +414,27 @@ public class MovieServiceTest {
 
         // Then
         assertFalse(result.contains("Titanic"));
+    }
+    @Test
+    void should_throw_database_exception_when_deleting_movie_with_db_error() throws DatabaseException, MovieNotFoundException {
+        // Given
+        when(movieRepository.delete(any(Movie.class)))
+                .thenThrow(new DatabaseException("Database connection error"));
+
+        // When + Then
+        assertThrows(DatabaseException.class, () ->
+                movieService.DELETEMovie("Inception", "Sci-Fi", 2010)
+        );
+    }
+    @Test
+    void should_throw_MovieNotFound_exception_when_deleting_movie_that_does_not_change_the_Database() throws DatabaseException, MovieNotFoundException {
+        // Given
+        when(movieRepository.delete(any(Movie.class)))
+                .thenThrow(new MovieNotFoundException());
+
+        // When + Then
+        assertThrows(MovieNotFoundException.class, () ->
+                movieService.DELETEMovie("Inception", "Sci-Fi", 2010)
+        );
     }
 }
