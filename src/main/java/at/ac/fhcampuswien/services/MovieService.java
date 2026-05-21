@@ -74,7 +74,7 @@ public class MovieService {
         }
     }
 
-    public boolean MovieExists(Movie movie) throws MovieNotFoundException, DatabaseException{
+    public boolean MovieExists(Movie movie) throws DatabaseException{
         if (movies.findAll().stream().anyMatch(m ->
                 m.getTitle().equalsIgnoreCase(movie.getTitle()) &&
                 m.getGenre().equalsIgnoreCase(movie.getGenre()) &&
@@ -83,7 +83,6 @@ public class MovieService {
             return true;
         } else {
             return false;
-
         }
     }
 

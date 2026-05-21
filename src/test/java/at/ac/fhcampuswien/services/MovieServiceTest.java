@@ -20,7 +20,7 @@ public class MovieServiceTest {
     private MovieRepository movieRepository;
 
     @BeforeEach
-    void setUp() throws DatabaseException, MovieNotFoundException {
+    void setUp() throws DatabaseException {
         //Mock the MovieRepository
         movieRepository = mock(MovieRepository.class);
 
@@ -156,7 +156,7 @@ public class MovieServiceTest {
 
 
     @Test
-    void givenExistingMovieId_whenInvalidRelease_thenThrowException() throws DatabaseException, MovieNotFoundException {
+    void givenExistingMovieId_whenInvalidRelease_thenThrowException() {
         // Given
         UUID id = UUID.fromString("b2bcf03a-36e6-41ce-8da7-7a313a0441cb");
         String newTitle = "Inception";
