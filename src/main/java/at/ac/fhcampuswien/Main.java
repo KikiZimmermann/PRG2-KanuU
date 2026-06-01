@@ -31,7 +31,6 @@ public class Main {
         System.out.printf("Server is running on http://localhost:%d", SERVER_PORT);
 
         MovieRepository movies = new MovieRepository();
-        MovieService movieService = new MovieService(movies);
 
         //test movies
         Movie movie1 = new Movie("The Dark Knight", "Action", 2008);

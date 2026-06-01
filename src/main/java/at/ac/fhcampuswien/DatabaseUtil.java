@@ -24,7 +24,7 @@ public class DatabaseUtil {
                       title VARCHAR(255) NOT NULL,
                       genre VARCHAR(100) NOT NULL,
                       releaseYear INT NOT NULL
-                     )                   
+                     )
                     """;
 
             try (PreparedStatement pstmt = conn.prepareStatement(createTableSQL)) {
