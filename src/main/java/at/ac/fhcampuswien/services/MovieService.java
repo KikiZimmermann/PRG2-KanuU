@@ -15,9 +15,9 @@ import java.util.UUID;
 public class MovieService {
     // public List<Movie> movies;
 
-    MovieRepository movies;
+    private final IMovieRepository movies;
 
-    public MovieService(MovieRepository movies) {
+    public MovieService(IMovieRepository movies) {
         this.movies = movies;
     }
 

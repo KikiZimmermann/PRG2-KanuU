@@ -15,7 +15,7 @@ import java.util.UUID;
 
 import static at.ac.fhcampuswien.DatabaseUtil.getConnection;
 
-public class MovieRepository {
+public class MovieRepository implements IMovieRepository {
 
     // Connection.prepareStatement():
 
