@@ -6,6 +6,10 @@ import at.ac.fhcampuswien.interfaces.IMovieReader;
 import at.ac.fhcampuswien.interfaces.IMovieWriter;
 import at.ac.fhcampuswien.factories.MovieFactory;
 import at.ac.fhcampuswien.models.Movie;
+import at.ac.fhcampuswien.strategies.GenreFilterStrategy;
+import at.ac.fhcampuswien.strategies.IMovieFilterStrategy;
+import at.ac.fhcampuswien.strategies.TitleFilterStrategy;
+import at.ac.fhcampuswien.strategies.YearFilterStrategy;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
@@ -100,35 +104,26 @@ public class MovieService {
 
     }
 
-    public String GETMOVIEPARAM(Map<String, String> params) throws DatabaseException{
-        String title = params.get("title");
-        String genre = params.get("genre");
-        String releaseYear = params.get("releaseYear");
+    public String GETMOVIEPARAM(Map<String, String> params) throws DatabaseException {
+        List<IMovieFilterStrategy> filters = new ArrayList<>();
+        if (params.get("title") != null) {
+            filters.add(new TitleFilterStrategy(params.get("title")));
+        }
+        if (params.get("genre") != null) {
+            filters.add(new GenreFilterStrategy(params.get("genre")));
+        }
+        if (params.get("releaseYear") != null) {
+            filters.add(new YearFilterStrategy(params.get("releaseYear")));
+        }
 
         List<Movie> result = new ArrayList<>();
 
         for (Movie m : moviesRead.findAll()) {
-
-            boolean matches = true;
-
-            if (title != null && !m.getTitle().toLowerCase().contains(title.toLowerCase())) {
-                matches = false;
-            }
-
-            if (genre != null && !m.getGenre().toLowerCase().contains(genre.toLowerCase())) {
-                matches = false;
-            }
-
-            if (releaseYear != null &&
-                    !String.valueOf(m.getReleaseYear()).contains(releaseYear)) {
-                matches = false;
-            }
-
-            if (matches) {
+            // Movie must match ALL active filters
+            if (filters.stream().allMatch(f -> f.matches(m))) {
                 result.add(m);
             }
         }
-
         return result.toString();
     }
 
