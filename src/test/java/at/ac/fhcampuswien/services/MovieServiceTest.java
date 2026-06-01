@@ -3,7 +3,6 @@ package at.ac.fhcampuswien.services;
 import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
-import com.google.errorprone.annotations.DoNotMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -16,13 +15,15 @@ import static org.mockito.Mockito.*;
 public class MovieServiceTest {
 
     private MovieService movieService;
+    private MovieValidator movieValidator;
     @Mock
-    private MovieRepository movieRepository;
+    private MovieWriteRepository movieWriteRepository;
+    private MovieReadRepository movieReadRepository;
 
     @BeforeEach
     void setUp() throws DatabaseException {
         //Mock the MovieRepository
-        movieRepository = mock(MovieRepository.class);
+        movieReadRepository = mock(MovieReadRepository.class);
 
         UUID id = UUID.fromString("b2bcf03a-36e6-41ce-8da7-7a313a0441cb");
         //Sample movies
@@ -33,9 +34,9 @@ public class MovieServiceTest {
         ));
 
         //Mock the repository methods
-        when(movieRepository.findAll()).thenReturn(movies);
+        when(movieReadRepository.findAll()).thenReturn(movies);
 
-        movieService = new MovieService(movieRepository);
+        movieService = new MovieService(movieWriteRepository, movieReadRepository);
     }
 
     @Test
@@ -50,7 +51,7 @@ public class MovieServiceTest {
         movieService.ADDMovie(newTitle, genre, releaseYear);
 
         // Then
-        verify(movieRepository, times(1)).add(any(Movie.class));
+        verify(movieWriteRepository, times(1)).add(any(Movie.class));
     }
 
     @Test
@@ -91,7 +92,7 @@ public class MovieServiceTest {
         movieService.DELETEMovie(newTitle, genre, releaseYear);
 
         // Then
-        verify(movieRepository).delete(any(Movie.class));
+        verify(movieWriteRepository).delete(any(Movie.class));
     }
 
     @Test
@@ -121,7 +122,7 @@ public class MovieServiceTest {
         movieService.UPDATEMovie(newTitle, genre, releaseYear, id);
 
         // Then
-        verify(movieRepository, times(1)).update(any(Movie.class));
+        verify(movieWriteRepository, times(1)).update(any(Movie.class));
     }
 
     @Test
@@ -136,7 +137,7 @@ public class MovieServiceTest {
         movieService.UPDATEMovie(newTitle, newGenre, releaseYear, id);
 
         // Then
-        verify(movieRepository, times(1)).update(any(Movie.class));
+        verify(movieWriteRepository, times(1)).update(any(Movie.class));
     }
 
     @Test
@@ -151,7 +152,7 @@ public class MovieServiceTest {
         movieService.UPDATEMovie(newTitle, genre, newReleaseYear, id);
 
         // Then
-        verify(movieRepository, times(1)).update(any(Movie.class));
+        verify(movieWriteRepository, times(1)).update(any(Movie.class));
     }
 
 
@@ -206,7 +207,7 @@ public class MovieServiceTest {
                 """;
 
         // When + Then
-        assertDoesNotThrow(() -> movieService.validMovie(requestBody));
+        assertDoesNotThrow(() -> movieValidator.validMovie(requestBody));
     }
 
     @Test
@@ -221,7 +222,7 @@ public class MovieServiceTest {
 
         // When + Then
         assertThrows(IllegalArgumentException.class, () ->
-                movieService.validMovie(requestBody)
+                movieValidator.validMovie(requestBody)
         );
     }
 
@@ -237,7 +238,7 @@ public class MovieServiceTest {
 
         // When + Then
         assertThrows(IllegalArgumentException.class, () ->
-                movieService.validMovie(requestBody)
+                movieValidator.validMovie(requestBody)
         );
     }
 
@@ -253,7 +254,7 @@ public class MovieServiceTest {
 
         // When + Then
         assertThrows(IllegalArgumentException.class, () ->
-                movieService.validMovie(requestBody)
+                movieValidator.validMovie(requestBody)
         );
     }
 
@@ -269,7 +270,7 @@ public class MovieServiceTest {
                 """;
 
         // When + Then
-        assertDoesNotThrow(() -> movieService.validMovieID(requestBody));
+        assertDoesNotThrow(() -> movieValidator.validMovieID(requestBody));
     }
 
 
@@ -286,7 +287,7 @@ public class MovieServiceTest {
 
         // When + Then
         assertThrows(IllegalArgumentException.class, () ->
-                movieService.validMovieID(requestBody)
+                movieValidator.validMovieID(requestBody)
         );
     }
 
@@ -418,7 +419,7 @@ public class MovieServiceTest {
     @Test
     void should_throw_database_exception_when_deleting_movie_with_db_error() throws DatabaseException, MovieNotFoundException {
         // Given
-        when(movieRepository.delete(any(Movie.class)))
+        when(movieWriteRepository.delete(any(Movie.class)))
                 .thenThrow(new DatabaseException("Database connection error"));
 
         // When + Then
@@ -429,7 +430,7 @@ public class MovieServiceTest {
     @Test
     void should_throw_MovieNotFound_exception_when_deleting_movie_that_does_not_change_the_Database() throws DatabaseException, MovieNotFoundException {
         // Given
-        when(movieRepository.delete(any(Movie.class)))
+        when(movieWriteRepository.delete(any(Movie.class)))
                 .thenThrow(new MovieNotFoundException());
 
         // When + Then

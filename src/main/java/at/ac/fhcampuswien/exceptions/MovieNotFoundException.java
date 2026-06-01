@@ -6,6 +6,7 @@ public class MovieNotFoundException extends Exception {
         super(msg);
     }
 
+
     public MovieNotFoundException() {
         super("Movie does not exist in database");
     }

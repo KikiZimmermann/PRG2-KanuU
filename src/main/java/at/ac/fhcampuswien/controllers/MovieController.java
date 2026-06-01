@@ -3,6 +3,8 @@ package at.ac.fhcampuswien.controllers;
 import at.ac.fhcampuswien.ApiUtils;
 import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
+import at.ac.fhcampuswien.interfaces.IMovieReader;
+import at.ac.fhcampuswien.interfaces.IMovieWriter;
 import at.ac.fhcampuswien.models.Movie;
 import at.ac.fhcampuswien.services.MovieReadRepository;
 import at.ac.fhcampuswien.services.MovieService;
@@ -29,11 +31,17 @@ public class MovieController implements HttpHandler {
     // PUT    /api/movies/update
 
     private final String BASE = "/api/movies/";
-    MovieWriteRepository moviesWrite = new MovieWriteRepository();
-    MovieReadRepository moviesRead = new MovieReadRepository();
-    private final MovieService movieService = new MovieService(moviesWrite, moviesRead);
+    private final IMovieWriter moviesWrite;
+    private final IMovieReader moviesRead;
+    private final MovieService movieService;
+    private final MovieValidator movieValidator;
 
-    private MovieValidator movieValidator = new MovieValidator();
+    public MovieController(IMovieWriter moviesWrite, IMovieReader moviesRead) {
+        this.moviesWrite = moviesWrite;
+        this.moviesRead = moviesRead;
+        this.movieService = new MovieService(moviesWrite, moviesRead);
+        this.movieValidator = new MovieValidator();
+    }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {

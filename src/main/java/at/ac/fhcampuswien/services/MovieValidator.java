@@ -2,14 +2,14 @@ package at.ac.fhcampuswien.services;
 
 public class MovieValidator {
 
-    public void validMovie(String requestBody){
+    public void validMovie(String requestBody) throws IllegalArgumentException{
         if (!requestBody.contains("title") ||
                 !requestBody.contains("genre") ||
                 !requestBody.contains("releaseYear")) {
             throw new IllegalArgumentException("Invalid movie data");
         }
     }
-    public void validMovieID(String requestBody){
+    public void validMovieID(String requestBody)throws IllegalArgumentException{
         if (!requestBody.contains("id")) {
             throw new IllegalArgumentException("Invalid movie data");
         }

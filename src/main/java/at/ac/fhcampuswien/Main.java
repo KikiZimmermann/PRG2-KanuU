@@ -15,24 +15,20 @@ import java.net.InetSocketAddress;
 public class Main {
     private final static int SERVER_PORT = 8080;
 
-
-
     public static void main(String[] args) throws IOException {
         // Create an HTTP server listening on defined port
         HttpServer server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
 
+        MovieWriteRepository moviesWrite = new MovieWriteRepository();
+        MovieReadRepository moviesRead = new MovieReadRepository();
         // Register controllers and their handlers - REST endpoints
         registerController(server, "/api/hello", new HelloController());
-        registerController(server, "/api/movies", new MovieController());
+        registerController(server, "/api/movies", new MovieController(moviesWrite, moviesRead));
 
         // Start the server
         server.setExecutor(null);
         server.start();
         System.out.printf("Server is running on http://localhost:%d", SERVER_PORT);
-
-        MovieWriteRepository moviesWrite = new MovieWriteRepository();
-        MovieReadRepository moviesRead = new MovieReadRepository();
-
 
         //test movies
         Movie movie1 = new Movie("The Dark Knight", "Action", 2008);
