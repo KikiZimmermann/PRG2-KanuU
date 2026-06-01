@@ -55,7 +55,7 @@ public class MovieService {
         Movie updatedMovies = new Movie(id, title, genre, releaseYear);
         for (Movie m : movies.findAll()) {
             if (m.getId().equals(id)) {
-                if (releaseYear > 1980 && title != null && genre != null && ( genre.equals("Action") || genre.equals("Drama")|| genre.equals("Comedy")|| genre.equals("Sci-Fi")|| genre.equals("Horror")|| genre.equals("Thriller"))) {
+                if (releaseYear > 1980 && title != null && genre != null && GenreValidator.isValid(genre)) {
                     movies.update(updatedMovies);
                 }
                 else{
