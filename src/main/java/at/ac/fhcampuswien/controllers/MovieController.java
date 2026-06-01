@@ -6,16 +6,14 @@ import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 import at.ac.fhcampuswien.services.MovieRepository;
 import at.ac.fhcampuswien.services.MovieService;
+import at.ac.fhcampuswien.services.MovieValidator;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class MovieController implements HttpHandler {
 
@@ -32,6 +30,8 @@ public class MovieController implements HttpHandler {
     private final String BASE = "/api/movies/";
     public MovieRepository movies = new MovieRepository();
     private final MovieService movieService = new MovieService(movies);
+
+    private MovieValidator movieValidator = new MovieValidator();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -82,7 +82,7 @@ public class MovieController implements HttpHandler {
                 String response = "{ \"Movie added successfully\": " + requestBody + " }";
 
                 try{
-                    movieService.validMovie(requestBody);
+                    movieValidator.validMovie(requestBody);
                     Movie movie = movieService.extractValues(requestBody);
                     movieService.ADDMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear());
 
@@ -115,7 +115,7 @@ public class MovieController implements HttpHandler {
                 String response = "{ \"Movie deleted successfully\": " + requestBody + " }";
 
                 try{
-                    movieService.validMovie(requestBody);
+                    movieValidator.validMovie(requestBody);
                     Movie movie = movieService.extractValues(requestBody);
                     movieService.DELETEMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear());
 
@@ -146,7 +146,7 @@ public class MovieController implements HttpHandler {
                 String response = "{ \"message\": \"Movie updated successfully\" "+ requestBody +" }";
 
                 try{
-                    movieService.validMovieID(requestBody);
+                    movieValidator.validMovieID(requestBody);
                     Movie movie = movieService.extractValues(requestBody);
                     movieService.UPDATEMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear(), movie.getId());
 
