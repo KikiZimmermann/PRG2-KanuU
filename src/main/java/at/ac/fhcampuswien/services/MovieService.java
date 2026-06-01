@@ -1,8 +1,9 @@
 package at.ac.fhcampuswien.services;
 
-import at.ac.fhcampuswien.ApiUtils;
 import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
+import at.ac.fhcampuswien.interfaces.IMovieReader;
+import at.ac.fhcampuswien.interfaces.IMovieWriter;
 import at.ac.fhcampuswien.models.Movie;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -15,10 +16,12 @@ import java.util.UUID;
 public class MovieService {
     // public List<Movie> movies;
 
-    private final IMovieRepository movies;
+    private final IMovieWriter moviesWrite;
+    private final IMovieReader moviesRead;
 
-    public MovieService(IMovieRepository movies) {
-        this.movies = movies;
+    public MovieService(IMovieWriter moviesWrite, IMovieReader moviesRead) {
+        this.moviesWrite = moviesWrite;
+        this.moviesRead = moviesRead;
     }
 
 
@@ -30,7 +33,7 @@ public class MovieService {
         if(releaseYear < 1980) {
             throw new IllegalArgumentException("Release year can't be earlier than 1980");
         }
-        movies.add(newMovie);
+        moviesWrite.add(newMovie);
     }
     public void DELETEMovie(String title, String genre, int releaseYear) throws MovieNotFoundException,DatabaseException {
         Movie newMovie = new Movie(title, genre, releaseYear);
@@ -40,12 +43,12 @@ public class MovieService {
         MovieExistsDELETE(newMovie);
     }
     private void MovieExistsDELETE(Movie movie) throws MovieNotFoundException, DatabaseException {
-        for (Movie m : movies.findAll()) {
+        for (Movie m : moviesRead.findAll()) {
             if (m.getTitle().equalsIgnoreCase(movie.getTitle()) &&
                     m.getGenre().equalsIgnoreCase(movie.getGenre()) &&
                     m.getReleaseYear() == movie.getReleaseYear()) {
 
-                movies.delete(m);
+                moviesWrite.delete(m);
                 return;
             }
         }
@@ -53,10 +56,10 @@ public class MovieService {
     }
     public void UPDATEMovie(String title, String genre, int releaseYear, UUID id) throws MovieNotFoundException, DatabaseException {
         Movie updatedMovies = new Movie(id, title, genre, releaseYear);
-        for (Movie m : movies.findAll()) {
+        for (Movie m : moviesRead.findAll()) {
             if (m.getId().equals(id)) {
                 if (releaseYear > 1980 && title != null && genre != null && GenreValidator.isValid(genre)) {
-                    movies.update(updatedMovies);
+                    moviesWrite.update(updatedMovies);
                 }
                 else{
                     throw new IllegalArgumentException("Update data Not allowed");
@@ -75,7 +78,7 @@ public class MovieService {
     }
 
     public boolean MovieExists(Movie movie) throws DatabaseException{
-        if (movies.findAll().stream().anyMatch(m ->
+        if (moviesRead.findAll().stream().anyMatch(m ->
                 m.getTitle().equalsIgnoreCase(movie.getTitle()) &&
                 m.getGenre().equalsIgnoreCase(movie.getGenre()) &&
                 m.getReleaseYear() == movie.getReleaseYear()))
@@ -103,7 +106,7 @@ public class MovieService {
 
         List<Movie> result = new ArrayList<>();
 
-        for (Movie m : movies.findAll()) {
+        for (Movie m : moviesRead.findAll()) {
 
             boolean matches = true;
 

@@ -4,8 +4,8 @@ import at.ac.fhcampuswien.controllers.HelloController;
 import at.ac.fhcampuswien.controllers.MovieController;
 import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.models.Movie;
-import at.ac.fhcampuswien.services.MovieRepository;
-import at.ac.fhcampuswien.services.MovieService;
+import at.ac.fhcampuswien.services.MovieReadRepository;
+import at.ac.fhcampuswien.services.MovieWriteRepository;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -30,26 +30,28 @@ public class Main {
         server.start();
         System.out.printf("Server is running on http://localhost:%d", SERVER_PORT);
 
-        MovieRepository movies = new MovieRepository();
+        MovieWriteRepository moviesWrite = new MovieWriteRepository();
+        MovieReadRepository moviesRead = new MovieReadRepository();
+
 
         //test movies
         Movie movie1 = new Movie("The Dark Knight", "Action", 2008);
         Movie movie2 = new Movie("Howl's Moving Castle", "Drama", 2004);
 
         try {
-            movies.add(movie1);
-            movies.add(movie2);
+            moviesWrite.add(movie1);
+            moviesWrite.add(movie2);
 
-            System.out.println(movies.findAll());
+            System.out.println(moviesRead.findAll());
             System.out.println();
 
             Movie updateMovie2 = new Movie(movie2.getId(), movie2.getTitle(), movie2.getGenre(), 2020);
-            movies.update(updateMovie2);
-            System.out.println(movies.findAll());
+            moviesWrite.update(updateMovie2);
+            System.out.println(moviesRead.findAll());
             System.out.println();
 
-            movies.delete(movie1);
-            System.out.println(movies.findAll());
+            moviesWrite.delete(movie1);
+            System.out.println(moviesRead.findAll());
         } catch (DatabaseException e) {
             System.out.println();
         } catch (Exception e) {

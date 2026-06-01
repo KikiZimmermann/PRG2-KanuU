@@ -4,9 +4,10 @@ import at.ac.fhcampuswien.ApiUtils;
 import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
-import at.ac.fhcampuswien.services.MovieRepository;
+import at.ac.fhcampuswien.services.MovieReadRepository;
 import at.ac.fhcampuswien.services.MovieService;
 import at.ac.fhcampuswien.services.MovieValidator;
+import at.ac.fhcampuswien.services.MovieWriteRepository;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -28,8 +29,9 @@ public class MovieController implements HttpHandler {
     // PUT    /api/movies/update
 
     private final String BASE = "/api/movies/";
-    public MovieRepository movies = new MovieRepository();
-    private final MovieService movieService = new MovieService(movies);
+    MovieWriteRepository moviesWrite = new MovieWriteRepository();
+    MovieReadRepository moviesRead = new MovieReadRepository();
+    private final MovieService movieService = new MovieService(moviesWrite, moviesRead);
 
     private MovieValidator movieValidator = new MovieValidator();
 
@@ -61,7 +63,7 @@ public class MovieController implements HttpHandler {
         switch (method) {
             case "GET" -> {
                 try {
-                    String response = movies.findAll().toString();
+                    String response = moviesRead.findAll().toString();
                     ApiUtils.sendResponse(exchange, 200, response);
                 }  catch (DatabaseException e) {
                     ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"" + e.getMessage() + "\" }");
