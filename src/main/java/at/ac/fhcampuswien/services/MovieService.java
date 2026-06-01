@@ -4,6 +4,7 @@ import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.interfaces.IMovieReader;
 import at.ac.fhcampuswien.interfaces.IMovieWriter;
+import at.ac.fhcampuswien.factories.MovieFactory;
 import at.ac.fhcampuswien.models.Movie;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -26,7 +27,7 @@ public class MovieService {
 
 
     public void ADDMovie(String title, String genre, int releaseYear) throws MovieNotFoundException, DatabaseException {
-        Movie newMovie = new Movie(title, genre, releaseYear);
+        Movie newMovie = MovieFactory.create(title, genre, releaseYear);
         if(MovieExists(newMovie)){
             throw new IllegalArgumentException("Movie already exists");
         }
@@ -36,7 +37,7 @@ public class MovieService {
         moviesWrite.add(newMovie);
     }
     public void DELETEMovie(String title, String genre, int releaseYear) throws MovieNotFoundException,DatabaseException {
-        Movie newMovie = new Movie(title, genre, releaseYear);
+        Movie newMovie = MovieFactory.create(title, genre, releaseYear);
         if(!MovieExists(newMovie)){
             throw new MovieNotFoundException();
         }
@@ -55,7 +56,7 @@ public class MovieService {
         throw new MovieNotFoundException();
     }
     public void UPDATEMovie(String title, String genre, int releaseYear, UUID id) throws MovieNotFoundException, DatabaseException {
-        Movie updatedMovies = new Movie(id, title, genre, releaseYear);
+        Movie updatedMovies = MovieFactory.createWithId(id, title, genre, releaseYear);
         for (Movie m : moviesRead.findAll()) {
             if (m.getId().equals(id)) {
                 if (releaseYear > 1980 && title != null && genre != null && GenreValidator.isValid(genre)) {

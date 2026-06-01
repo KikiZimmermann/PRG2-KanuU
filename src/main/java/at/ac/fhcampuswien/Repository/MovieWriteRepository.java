@@ -1,4 +1,4 @@
-package at.ac.fhcampuswien.services;
+package at.ac.fhcampuswien.Repository;
 
 import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
