@@ -1,8 +1,10 @@
 package at.ac.fhcampuswien.controllers;
 
 import at.ac.fhcampuswien.ApiUtils;
+import at.ac.fhcampuswien.Repository.MovieReadRepository;
 import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
+import at.ac.fhcampuswien.facade.MovieFacade;
 import at.ac.fhcampuswien.interfaces.IMovieReader;
 import at.ac.fhcampuswien.interfaces.IMovieWriter;
 import at.ac.fhcampuswien.models.Movie;
@@ -33,12 +35,15 @@ public class MovieController implements HttpHandler {
     private final IMovieReader moviesRead;
     private final MovieService movieService;
     private final MovieValidator movieValidator;
+    private final MovieFacade movieFacade;
+
 
     public MovieController(IMovieWriter moviesWrite, IMovieReader moviesRead) {
         this.moviesWrite = moviesWrite;
         this.moviesRead = moviesRead;
         this.movieService = new MovieService(moviesWrite, moviesRead);
         this.movieValidator = new MovieValidator();
+        this.movieFacade = new MovieFacade(movieService, movieValidator, this.moviesRead);
     }
 
     @Override
@@ -69,7 +74,7 @@ public class MovieController implements HttpHandler {
         switch (method) {
             case "GET" -> {
                 try {
-                    String response = moviesRead.findAll().toString();
+                    String response = movieFacade.getAll().toString();
                     ApiUtils.sendResponse(exchange, 200, response);
                 }  catch (DatabaseException e) {
                     ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"" + e.getMessage() + "\" }");
@@ -90,10 +95,7 @@ public class MovieController implements HttpHandler {
                 String response = "{ \"Movie added successfully\": " + requestBody + " }";
 
                 try{
-                    movieValidator.validMovie(requestBody);
-                    Movie movie = movieService.extractValues(requestBody);
-                    movieService.ADDMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear());
-
+                    movieFacade.add(requestBody);
                     ApiUtils.sendResponse(exchange, 201, response);
                 } catch (JsonSyntaxException e) {
                     ApiUtils.sendResponse(exchange, 400, "{ \"error\": \"" + e.getMessage() + "\" }");
@@ -123,10 +125,7 @@ public class MovieController implements HttpHandler {
                 String response = "{ \"Movie deleted successfully\": " + requestBody + " }";
 
                 try{
-                    movieValidator.validMovie(requestBody);
-                    Movie movie = movieService.extractValues(requestBody);
-                    movieService.DELETEMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear());
-
+                    movieFacade.delete(requestBody);
                     ApiUtils.sendResponse(exchange, 200, response);
                 } catch (JsonSyntaxException e) {
                     ApiUtils.sendResponse(exchange, 400, "{ \"error\": \"" + e.getMessage() + "\" }");
@@ -154,9 +153,7 @@ public class MovieController implements HttpHandler {
                 String response = "{ \"message\": \"Movie updated successfully\" "+ requestBody +" }";
 
                 try{
-                    movieValidator.validMovieID(requestBody);
-                    Movie movie = movieService.extractValues(requestBody);
-                    movieService.UPDATEMovie(movie.getTitle(), movie.getGenre(), movie.getReleaseYear(), movie.getId());
+                    movieFacade.update(requestBody);
 
                     ApiUtils.sendResponse(exchange, 200, response);
                 } catch (JsonSyntaxException e) {
@@ -186,7 +183,7 @@ public class MovieController implements HttpHandler {
                 Map<String, String> params = ApiUtils.parseQueryParams(query);
 
                 try{
-                    String response = movieService.GETMOVIEPARAM(params);
+                    String response = movieFacade.search(params);
                     ApiUtils.sendResponse(exchange, 200, response);
                 } catch (DatabaseException e) {
                     ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"" + e.getMessage() + "\" }");
